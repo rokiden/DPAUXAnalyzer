@@ -15,6 +15,7 @@ DisplayPortAUXAnalyzer::DisplayPortAUXAnalyzer()
 	mSimulationInitilized( false )
 {
 	SetAnalyzerSettings( mSettings.get() );
+	UseFrameV2();
 }
 
 DisplayPortAUXAnalyzer::~DisplayPortAUXAnalyzer()
@@ -70,6 +71,7 @@ void DisplayPortAUXAnalyzer::WorkerThread()
 	U64 edge_distance;
 
 	Frame frame;
+	FrameV2 frame_v2;
 
 	for( ; ; )
 	{
@@ -110,6 +112,8 @@ void DisplayPortAUXAnalyzer::WorkerThread()
 						frame.mType = AUXSync;
 						frame.mFlags = 0;
 						mResults->AddFrame(frame);
+						mResults->AddFrameV2(frame_v2, "SYNC", frame.mStartingSampleInclusive, frame.mEndingSampleInclusive);
+
 
 						// report START symbol
 						frame.mStartingSampleInclusive = frame.mEndingSampleInclusive + 1;
@@ -118,6 +122,7 @@ void DisplayPortAUXAnalyzer::WorkerThread()
 						frame.mType = AUXStart;
 						frame.mFlags = 0;
 						mResults->AddFrame(frame);
+						mResults->AddFrameV2(frame_v2, "START", frame.mStartingSampleInclusive, frame.mEndingSampleInclusive);
 
 						mResults->CommitResults();
 						ReportProgress(frame.mEndingSampleInclusive);
@@ -133,6 +138,7 @@ void DisplayPortAUXAnalyzer::WorkerThread()
 						frame.mType = AUXSync;
 						frame.mFlags = 0;
 						mResults->AddFrame(frame);
+						mResults->AddFrameV2(frame_v2, "SYNC", frame.mStartingSampleInclusive, frame.mEndingSampleInclusive);
 
 						// report START symbol
 						frame.mStartingSampleInclusive = frame.mEndingSampleInclusive + 1;
@@ -141,6 +147,7 @@ void DisplayPortAUXAnalyzer::WorkerThread()
 						frame.mType = AUXStart;
 						frame.mFlags = 0;
 						mResults->AddFrame(frame);
+						mResults->AddFrameV2(frame_v2, "START", frame.mStartingSampleInclusive, frame.mEndingSampleInclusive);
 
 						mResults->CommitResults();
 						ReportProgress(frame.mEndingSampleInclusive);
@@ -243,6 +250,11 @@ void DisplayPortAUXAnalyzer::WorkerThread()
 					frame.mFlags |= SUCH_AND_SUCH_WARNING_FLAG | DISPLAY_AS_WARNING_FLAG;
 	*/
 				mResults->AddFrame(frame);
+
+				FrameV2 frame_v2_data;
+				frame_v2_data.AddByte( "value", frame.mData1 );
+				mResults->AddFrameV2(frame_v2_data, "DATA", frame.mStartingSampleInclusive, frame.mEndingSampleInclusive);
+
 				mResults->CommitResults();
 				ReportProgress(frame.mEndingSampleInclusive);
 
@@ -272,7 +284,7 @@ void DisplayPortAUXAnalyzer::WorkerThread()
 								frame.mType = AUXStop;
 								mResults->AddMarker(frame.mStartingSampleInclusive, AnalyzerResults::Stop, mSettings->mInputChannel);
 								mResults->AddFrame(frame);
-
+								mResults->AddFrameV2(frame_v2, "STOP", frame.mStartingSampleInclusive, frame.mEndingSampleInclusive);
 							}
 							else // STOP error
 							{
@@ -300,7 +312,7 @@ void DisplayPortAUXAnalyzer::WorkerThread()
 							frame.mType = AUXStop;
 							mResults->AddMarker(frame.mStartingSampleInclusive, AnalyzerResults::Stop, mSettings->mInputChannel);
 							mResults->AddFrame(frame);
-
+							mResults->AddFrameV2(frame_v2, "STOP", frame.mStartingSampleInclusive, frame.mEndingSampleInclusive);
 						}
 						else // STOP error
 						{

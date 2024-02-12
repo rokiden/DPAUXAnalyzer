@@ -56,7 +56,7 @@ def run_command(cmd):
 for cpp_file in cpp_files:
 
     #g++
-    command = "g++ "
+    command = "g++ -DLOGIC2 "
 
     #include paths
     for path in include_paths: 
